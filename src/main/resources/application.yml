@@ -15,3 +15,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+
+jwt:
+   secret-key: "l8dBOS1VWcTL47t/dRhv18dRkB9YW5RnDX9NtraWLvwm7sopCNtyT+QM7GEMUr0R"
+   valid-duration: 900 # in seconds, commonly about 15m
+   refreshable-duration: 14400 # in seconds, commonly about 24h

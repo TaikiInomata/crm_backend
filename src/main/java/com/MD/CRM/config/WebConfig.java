@@ -21,7 +21,7 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                                "http://localhost:3000",                      // Frontend local (React)
+                                "http://localhost:5173",                      // Frontend local (React)
                                 "http://localhost:8080",                      // Swagger local
                                 "https://crmbackend-production-fdb8.up.railway.app" // Swagger + frontend deploy
                         )
