@@ -26,45 +26,28 @@ public class CustomerController {
 
     /**
      * Add a new customer
-     * @param requestDTO the customer data
+     * @param requestDTO the customer data (fullname, email, phone are required)
      * @return ResponseEntity with success message and customer data
      */
     @PostMapping
     @Operation(summary = "Add a new customer", description = "Creates a new customer record in the system")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Customer created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input or duplicate email/phone number"),
+            @ApiResponse(responseCode = "400", description = "Validation failed - missing or invalid required fields"),
+            @ApiResponse(responseCode = "409", description = "Conflict - duplicate email or phone number"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> addCustomer(
             @Valid @RequestBody CustomerRequestDTO requestDTO) {
-        try {
-            // Tạm thời để createdBy = null, sau này sẽ lấy từ authentication context
-            CustomerResponseDTO customer = customerService.addCustomer(requestDTO, null);
+        // Tạm thời để createdBy = null, sau này sẽ lấy từ authentication context
+        CustomerResponseDTO customer = customerService.addCustomer(requestDTO, null);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Customer added successfully");
-            response.put("data", customer);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Customer added successfully");
+        response.put("data", customer);
+        response.put("success", true);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-        } catch (IllegalArgumentException e) {
-            // Handle duplicate email or phone number
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", e.getMessage());
-            errorResponse.put("success", false);
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-
-        } catch (Exception e) {
-            // Handle other errors
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "An error occurred while adding the customer");
-            errorResponse.put("error", e.getMessage());
-            errorResponse.put("success", false);
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")

@@ -17,12 +17,13 @@ public class CustomerRequestDTO {
     @Size(max = 150, message = "Full name must not exceed 150 characters")
     private String fullname;
 
+    @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
     @Size(max = 150, message = "Email must not exceed 150 characters")
     private String email;
 
-    @Pattern(regexp = "^[0-9+\\-\\s()]{0,50}$", message = "Phone number format is invalid")
-    @Size(max = 50, message = "Phone number must not exceed 50 characters")
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^0\\d{9}$", message = "Phone number must be exactly 10 digits and start with 0")
     private String phone;
 
     @Size(max = 255, message = "Address must not exceed 255 characters")

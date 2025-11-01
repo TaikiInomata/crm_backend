@@ -14,7 +14,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     /**
-     * Handle validation errors
+     * Handle validation errors (400 Bad Request)
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -32,5 +32,17 @@ public class GlobalExceptionHandler {
         response.put("success", false);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /**
+     * Handle duplicate resource errors (409 Conflict)
+     */
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateResourceException(DuplicateResourceException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+        response.put("success", false);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }
