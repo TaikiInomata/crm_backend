@@ -19,10 +19,15 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Cho phép tất cả API
-                        .allowedOrigins("*") // Cho phép tất cả origin (Swagger, frontend,...)
+                registry.addMapping("/**")
+                        .allowedOrigins(
+                                "http://localhost:3000",                      // Frontend local (React)
+                                "http://localhost:8080",                      // Swagger local
+                                "https://crmbackend-production-fdb8.up.railway.app" // Swagger + frontend deploy
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true); // Cho phép gửi cookie/token nếu có
             }
         };
     }
