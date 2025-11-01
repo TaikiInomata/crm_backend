@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -179,5 +180,50 @@ public class CustomerService {
         org.springframework.data.domain.Page<Customer> results = customerRepository.searchByKeyword(q, qRaw, pageable);
 
         return results.map(customerMapper::toResponseDTO);
+    }
+
+    /**
+     * Soft delete a customer by setting deletedAt timestamp
+     * @param id the customer ID
+     * @throws ResourceNotFoundException if customer not found or already deleted
+     */
+    @Transactional
+    public void deleteCustomer(String id) {
+        Customer customer = customerRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
+        
+        customer.setDeletedAt(LocalDateTime.now());
+        customerRepository.save(customer);
+    }
+
+    /**
+     * Restore a soft-deleted customer if deleted within 7 days
+     * @param id the customer ID
+     * @return CustomerResponseDTO with the restored customer information
+     * @throws ResourceNotFoundException if customer not found
+     * @throws IllegalArgumentException if customer was deleted more than 7 days ago
+     */
+    @Transactional
+    public CustomerResponseDTO restoreCustomer(String id) {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        
+        Customer customer = customerRepository.findDeletedCustomerWithinRestorePeriod(id, sevenDaysAgo)
+                .orElseThrow(() -> {
+                    // Check if customer exists at all
+                    Optional<Customer> anyCustomer = customerRepository.findById(id);
+                    if (anyCustomer.isEmpty()) {
+                        return new ResourceNotFoundException("Customer not found with id: " + id);
+                    } else if (anyCustomer.get().getDeletedAt() == null) {
+                        return new IllegalArgumentException("Customer is not deleted");
+                    } else {
+                        return new IllegalArgumentException("Customer was deleted more than 7 days ago and cannot be restored");
+                    }
+                });
+        
+        customer.setDeletedAt(null);
+        customer.setUpdatedAt(LocalDateTime.now());
+        Customer restoredCustomer = customerRepository.save(customer);
+        
+        return customerMapper.toResponseDTO(restoredCustomer);
     }
 }

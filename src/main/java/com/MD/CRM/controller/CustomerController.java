@@ -184,4 +184,73 @@ public class CustomerController {
 
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * Soft delete a customer by setting deletedAt timestamp
+     * @param id the customer UUID
+     * @return ResponseEntity with success message
+     */
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete customer", description = "Soft delete a customer by setting deletedAt timestamp. Customer can be restored within 7 days.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Customer deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Customer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> deleteCustomer(@PathVariable String id) {
+        try {
+            customerService.deleteCustomer(id);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Customer deleted successfully. Can be restored within 7 days.");
+            response.put("success", true);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "An error occurred while deleting the customer");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Restore a soft-deleted customer (within 7 days)
+     * @param id the customer UUID
+     * @return ResponseEntity with restored customer data
+     */
+    @PutMapping("/{id}/restore")
+    @Operation(summary = "Restore deleted customer", description = "Restore a soft-deleted customer if deleted within 7 days")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Customer restored successfully"),
+            @ApiResponse(responseCode = "400", description = "Customer cannot be restored (not deleted or deleted more than 7 days ago)"),
+            @ApiResponse(responseCode = "404", description = "Customer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> restoreCustomer(@PathVariable String id) {
+        try {
+            CustomerResponseDTO restoredCustomer = customerService.restoreCustomer(id);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Customer restored successfully");
+            response.put("data", restoredCustomer);
+            response.put("success", true);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "An error occurred while restoring the customer");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 }
