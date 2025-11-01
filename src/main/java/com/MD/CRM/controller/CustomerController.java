@@ -78,4 +78,32 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search customers", description = "Search customers by name, email or phone (case-insensitive)")
+    public ResponseEntity<Map<String, Object>> searchCustomers(
+            @RequestParam(name = "keyword", required = false) String q,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
+
+        org.springframework.data.domain.Page<CustomerResponseDTO> results = customerService.searchCustomers(q, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        if (results.isEmpty()) {
+            response.put("message", "No results found.");
+            response.put("data", java.util.Collections.emptyList());
+            response.put("total", 0);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        }
+
+        response.put("message", "Search results");
+        response.put("data", results.getContent());
+        response.put("total", results.getTotalElements());
+        response.put("page", results.getNumber());
+        response.put("size", results.getSize());
+        response.put("success", true);
+
+        return ResponseEntity.ok(response);
+    }
 }
