@@ -49,4 +49,55 @@ public class CustomerService {
         // Convert entity back to response DTO
         return customerMapper.toResponseDTO(savedCustomer);
     }
+
+    /**
+     * Update an existing customer
+     * @param id the customer id
+     * @param requestDTO the updated fields (validated)
+     * @return updated CustomerResponseDTO
+     * @throws IllegalArgumentException if email or phone duplicates another record
+     */
+    @Transactional
+    public CustomerResponseDTO updateCustomer(String id, CustomerRequestDTO requestDTO) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found with id: " + id));
+
+        // Do not allow updating a soft-deleted record
+        if (customer.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Customer not found with id: " + id);
+        }
+
+        // Require email on update
+        if (requestDTO.getEmail() == null || requestDTO.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+
+        // Check duplicate email (if provided)
+        if (requestDTO.getEmail() != null && !requestDTO.getEmail().isEmpty()) {
+            customerRepository.findByEmailAndDeletedAtIsNull(requestDTO.getEmail()).ifPresent(existing -> {
+                if (!existing.getId().equals(id)) {
+                    throw new IllegalArgumentException("Email already exists: " + requestDTO.getEmail());
+                }
+            });
+        }
+
+        // Check duplicate phone (if provided)
+        if (requestDTO.getPhone() != null && !requestDTO.getPhone().isEmpty()) {
+            customerRepository.findByPhoneAndDeletedAtIsNull(requestDTO.getPhone()).ifPresent(existing -> {
+                if (!existing.getId().equals(id)) {
+                    throw new IllegalArgumentException("Phone number already exists: " + requestDTO.getPhone());
+                }
+            });
+        }
+
+        // Map fields from request to entity
+        customer.setFullname(requestDTO.getFullname());
+        customer.setEmail(requestDTO.getEmail());
+        customer.setPhone(requestDTO.getPhone());
+        customer.setAddress(requestDTO.getAddress());
+        customer.setDescription(requestDTO.getDescription());
+
+        Customer saved = customerRepository.save(customer);
+        return customerMapper.toResponseDTO(saved);
+    }
 }
