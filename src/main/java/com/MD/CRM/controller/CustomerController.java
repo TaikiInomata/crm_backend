@@ -49,4 +49,33 @@ public class CustomerController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a customer", description = "Updates an existing customer record")
+    public ResponseEntity<Map<String, Object>> updateCustomer(
+            @PathVariable String id,
+            @Valid @RequestBody CustomerRequestDTO requestDTO) {
+        try {
+            CustomerResponseDTO updated = customerService.updateCustomer(id, requestDTO);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Customer updated successfully");
+            response.put("data", updated);
+            response.put("success", true);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "An error occurred while updating the customer");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 }
