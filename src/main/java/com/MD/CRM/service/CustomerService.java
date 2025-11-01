@@ -104,4 +104,19 @@ public class CustomerService {
         Customer saved = customerRepository.save(customer);
         return customerMapper.toResponseDTO(saved);
     }
+
+    /**
+     * Search customers by keyword with paging and simple relevance ordering.
+     * Keyword is matched case-insensitively against fullname and email, and raw against phone.
+     */
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<com.MD.CRM.dto.CustomerResponseDTO> searchCustomers(String keyword, int page, int size) {
+        String q = keyword == null ? "" : keyword.toLowerCase();
+        String qRaw = keyword == null ? "" : keyword;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+
+        org.springframework.data.domain.Page<Customer> results = customerRepository.searchByKeyword(q, qRaw, pageable);
+
+        return results.map(customerMapper::toResponseDTO);
+    }
 }

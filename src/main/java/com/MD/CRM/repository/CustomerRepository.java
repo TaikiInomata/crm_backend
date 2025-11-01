@@ -36,4 +36,26 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
      * @return Optional containing the customer if found
      */
     Optional<Customer> findByPhoneAndDeletedAtIsNull(String phone);
+
+    /**
+     * Return non-deleted customers pageable
+     */
+    org.springframework.data.domain.Page<Customer> findAllByDeletedAtIsNull(org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * Search customers by keyword (case-insensitive for name/email, phone as-is).
+     * Results are ordered by a simple relevance score (lower is better).
+     */
+    @org.springframework.data.jpa.repository.Query(
+        value = "SELECT * FROM customers c WHERE c.deleted_at IS NULL AND (lower(c.fullname) LIKE CONCAT('%',:q,'%') OR lower(c.email) LIKE CONCAT('%',:q,'%') OR c.phone LIKE CONCAT('%',:qRaw,'%')) " +
+            "ORDER BY (" +
+            "  (CASE WHEN lower(c.fullname) = :q THEN 0 WHEN lower(c.fullname) LIKE CONCAT(:q, '%') THEN 1 WHEN lower(c.fullname) LIKE CONCAT('%',:q,'%') THEN 4 ELSE 10 END) +" +
+            "  (CASE WHEN lower(c.email) = :q THEN 0 WHEN lower(c.email) LIKE CONCAT(:q, '%') THEN 1 WHEN lower(c.email) LIKE CONCAT('%',:q,'%') THEN 3 ELSE 10 END) +" +
+            "  (CASE WHEN c.phone = :qRaw THEN 0 WHEN c.phone LIKE CONCAT(:qRaw, '%') THEN 1 WHEN c.phone LIKE CONCAT('%',:qRaw,'%') THEN 2 ELSE 10 END)" +
+            ")",
+        countQuery = "SELECT count(*) FROM customers c WHERE c.deleted_at IS NULL AND (lower(c.fullname) LIKE CONCAT('%',:q,'%') OR lower(c.email) LIKE CONCAT('%',:q,'%') OR c.phone LIKE CONCAT('%',:qRaw,'%'))",
+        nativeQuery = true)
+    org.springframework.data.domain.Page<Customer> searchByKeyword(@org.springframework.data.repository.query.Param("q") String q,
+                                   @org.springframework.data.repository.query.Param("qRaw") String qRaw,
+                                   org.springframework.data.domain.Pageable pageable);
 }
