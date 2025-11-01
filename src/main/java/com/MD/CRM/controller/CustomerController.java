@@ -127,4 +127,61 @@ public class CustomerController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a customer", description = "Updates an existing customer record")
+    public ResponseEntity<Map<String, Object>> updateCustomer(
+            @PathVariable String id,
+            @Valid @RequestBody CustomerRequestDTO requestDTO) {
+        try {
+            CustomerResponseDTO updated = customerService.updateCustomer(id, requestDTO);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Customer updated successfully");
+            response.put("data", updated);
+            response.put("success", true);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "An error occurred while updating the customer");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search customers", description = "Search customers by name, email or phone (case-insensitive)")
+    public ResponseEntity<Map<String, Object>> searchCustomers(
+            @RequestParam(name = "keyword", required = false) String q,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
+
+        org.springframework.data.domain.Page<CustomerResponseDTO> results = customerService.searchCustomers(q, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        if (results.isEmpty()) {
+            response.put("message", "No results found.");
+            response.put("data", java.util.Collections.emptyList());
+            response.put("total", 0);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        }
+
+        response.put("message", "Search results");
+        response.put("data", results.getContent());
+        response.put("total", results.getTotalElements());
+        response.put("page", results.getNumber());
+        response.put("size", results.getSize());
+        response.put("success", true);
+
+        return ResponseEntity.ok(response);
+    }
 }
