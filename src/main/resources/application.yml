@@ -1,5 +1,5 @@
 server:
-  port: 8000
+  port: ${PORT:8080}
 
 spring:
   datasource:
@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # Có thể đổi thành 'none' khi deploy chính thức
+      ddl-auto: none   # Có thể đổi thành 'none' khi deploy chính thức
     show-sql: true
     properties:
       hibernate:
