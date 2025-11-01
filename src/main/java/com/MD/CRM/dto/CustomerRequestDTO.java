@@ -23,8 +23,7 @@ public class CustomerRequestDTO {
     private String email;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^[0-9+\\-\\s()]{10,50}$", message = "Phone number must be between 10 and 50 characters")
-    @Size(max = 50, message = "Phone number must not exceed 50 characters")
+    @Pattern(regexp = "^0\\d{9}$", message = "Phone number must be exactly 10 digits and start with 0")
     private String phone;
 
     @Size(max = 255, message = "Address must not exceed 255 characters")

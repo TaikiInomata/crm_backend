@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
@@ -39,6 +41,11 @@ public class CustomerService {
         // Convert DTO to entity
         Customer customer = customerMapper.toEntity(requestDTO);
         customer.setCreatedBy(createdBy);
+        
+        // Set timestamps manually (in case @CreationTimestamp doesn't work)
+        LocalDateTime now = LocalDateTime.now();
+        customer.setCreatedAt(now);
+        customer.setUpdatedAt(now);
 
         // Save to database
         Customer savedCustomer = customerRepository.save(customer);
