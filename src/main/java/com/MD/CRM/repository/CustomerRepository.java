@@ -102,4 +102,21 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     org.springframework.data.domain.Page<Customer> searchByKeyword(@org.springframework.data.repository.query.Param("q") String q,
                                    @org.springframework.data.repository.query.Param("qRaw") String qRaw,
                                    org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * Find customer by ID (including soft-deleted ones)
+     * Used for soft delete and restore operations
+     * @param id the customer ID
+     * @return Optional containing the customer if found
+     */
+    Optional<Customer> findById(String id);
+
+    /**
+     * Find soft-deleted customers that are eligible for restoration (deleted within 7 days)
+     * @param id the customer ID
+     * @param sevenDaysAgo the date 7 days ago
+     * @return Optional containing the customer if found and eligible
+     */
+    @Query("SELECT c FROM Customer c WHERE c.id = :id AND c.deletedAt IS NOT NULL AND c.deletedAt >= :sevenDaysAgo")
+    Optional<Customer> findDeletedCustomerWithinRestorePeriod(String id, java.time.LocalDateTime sevenDaysAgo);
 }
