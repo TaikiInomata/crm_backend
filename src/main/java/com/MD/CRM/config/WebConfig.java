@@ -23,7 +23,8 @@ public class WebConfig {
                         .allowedOrigins(
                                 "http://localhost:5173",                      // Frontend local (React)
                                 "http://localhost:8080",                      // Swagger local
-                                "https://crmbackend-production-fdb8.up.railway.app" // Swagger + frontend deploy
+                                "https://crmbackend-production-fdb8.up.railway.app", // Swagger + frontend deploy
+                                "https://cnpm-2-fe.vercel.app"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
