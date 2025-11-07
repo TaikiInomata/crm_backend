@@ -115,7 +115,7 @@ public class CustomerService {
 
         // Convert entity back to response DTO
         try {
-            activityLogService.record(createdBy, "CUSTOMER_CREATE", "Created customer id=" + savedCustomer.getId());
+            activityLogService.record(createdBy, com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.CREATE, "Created customer id=" + savedCustomer.getId());
         } catch (Exception ignore) {}
         return customerMapper.toResponseDTO(savedCustomer);
     }
@@ -169,7 +169,7 @@ public class CustomerService {
 
         Customer saved = customerRepository.save(customer);
         try {
-            activityLogService.record(saved.getCreatedBy(), "CUSTOMER_UPDATE", "Updated customer id=" + id);
+            activityLogService.record(saved.getCreatedBy(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.UPDATE, "Updated customer id=" + id);
         } catch (Exception ignore) {}
         return customerMapper.toResponseDTO(saved);
     }
@@ -202,7 +202,7 @@ public class CustomerService {
         customer.setDeletedAt(LocalDateTime.now());
         customerRepository.save(customer);
         try {
-            activityLogService.record(customer.getCreatedBy(), "CUSTOMER_DELETE", "Soft deleted customer id=" + id);
+            activityLogService.record(customer.getCreatedBy(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.EDIT, "Soft deleted customer id=" + id);
         } catch (Exception ignore) {}
     }
 
@@ -234,7 +234,7 @@ public class CustomerService {
         customer.setUpdatedAt(LocalDateTime.now());
         Customer restoredCustomer = customerRepository.save(customer);
         try {
-            activityLogService.record(restoredCustomer.getCreatedBy(), "CUSTOMER_RESTORE", "Restored customer id=" + id);
+            activityLogService.record(restoredCustomer.getCreatedBy(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.UPDATE, "Restored customer id=" + id);
         } catch (Exception ignore) {}
         
         return customerMapper.toResponseDTO(restoredCustomer);

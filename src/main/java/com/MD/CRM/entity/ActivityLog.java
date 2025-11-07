@@ -26,9 +26,13 @@ public class ActivityLog {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @Convert(converter = com.MD.CRM.converter.ActivityActionConverter.class)
+    @Column(nullable = false, length = 50)
+    private ActivityAction action;
 
-    @Column(nullable = false, length = 255)
-    private String action; // e.g., CUSTOMER_CREATE, NOTE_UPDATE, LOGIN
+    @Convert(converter = com.MD.CRM.converter.ActivityTypeConverter.class)
+    @Column(nullable = false, length = 50)
+    private ActivityType type;
 
     @Column(columnDefinition = "TEXT")
     private String description;

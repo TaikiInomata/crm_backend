@@ -2,6 +2,8 @@ package com.MD.CRM.service;
 
 import com.MD.CRM.dto.ActivityLogDTO;
 import com.MD.CRM.entity.ActivityLog;
+import com.MD.CRM.entity.ActivityAction;
+import com.MD.CRM.entity.ActivityType;
 import com.MD.CRM.entity.User;
 import com.MD.CRM.mapper.ActivityLogMapper;
 import com.MD.CRM.repository.ActivityLogRepository;
@@ -21,18 +23,25 @@ public class ActivityLogService {
     private final ActivityLogMapper activityLogMapper;
     private final UserRepository userRepository;
 
-    public void record(String userId, String action, String description) {
-        User user = userRepository.findById(userId).orElse(null);
-        ActivityLog log = ActivityLog.builder()
-                .user(user)
-                .action(action)
-                .description(description)
-                .build();
-        activityLogRepository.save(log);
+    public void record(String userId, ActivityType type, ActivityAction action, String description) {
+    // If we don't have a user id, skip recording to avoid inserting null FK
+    if (userId == null) return;
+
+    User user = userRepository.findById(userId).orElse(null);
+    // If user not found, skip recording
+    if (user == null) return;
+
+    ActivityLog log = ActivityLog.builder()
+        .user(user)
+        .type(type)
+        .action(action)
+        .description(description)
+        .build();
+    activityLogRepository.save(log);
     }
 
-    public Page<ActivityLogDTO> search(String userId, String action, LocalDateTime from, LocalDateTime to, Pageable pageable) {
-        Page<ActivityLog> page = activityLogRepository.findByFilters(userId, action, from, to, pageable);
+    public Page<ActivityLogDTO> search(String userId, ActivityType type, ActivityAction action, LocalDateTime from, LocalDateTime to, Pageable pageable) {
+        Page<ActivityLog> page = activityLogRepository.findByFilters(userId, type, action, from, to, pageable);
         return page.map(activityLogMapper::toDTO);
     }
 }

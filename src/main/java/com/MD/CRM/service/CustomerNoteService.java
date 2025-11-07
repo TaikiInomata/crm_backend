@@ -47,7 +47,7 @@ public class CustomerNoteService {
         // 6️⃣ Trả về DTO phản hồi
         // Record activity
         try {
-            activityLogService.record(request.getUserId(), "NOTE_CREATE", "Created note for customerId=" + request.getCustomerId());
+            activityLogService.record(request.getUserId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.CREATE, "Created note for customerId=" + request.getCustomerId());
         } catch (Exception ignore) {}
         return customerNoteMapper.toResponseDTO(savedNote);
 
@@ -61,7 +61,7 @@ public class CustomerNoteService {
         CustomerNote savedNote = customerNoteRepository.save(note);
 
         try {
-            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), "NOTE_UPDATE", "Updated note id=" + id);
+            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.UPDATE, "Updated note id=" + id);
         } catch (Exception ignore) {}
 
         return customerNoteMapper.toResponseDTO(savedNote);
@@ -73,6 +73,9 @@ public class CustomerNoteService {
                 .orElseThrow(() -> new IllegalArgumentException("Customer note not found!"));
 
         customerNoteRepository.delete(note);
+        try {
+            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.EDIT, "Deleted note id=" + id);
+        } catch (Exception ignore) {}
     }
 
     // GET DETAIL
