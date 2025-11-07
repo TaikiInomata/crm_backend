@@ -25,7 +25,7 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/login")
+    @PostMapping("/api/login")
     public ResponseEntity<Map<String, Object>> authenticate(
             @RequestBody @Valid AuthenticationRequestDTO request) {
         try {
@@ -36,7 +36,7 @@ public class AuthenticationController {
             response.put("data", data);
             response.put("success", true);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (IllegalArgumentException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", e.getMessage());
@@ -44,7 +44,7 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "An error occurred while updating the customer");
+            errorResponse.put("message", "An error occurred while login");
             errorResponse.put("error", e.getMessage());
             errorResponse.put("success", false);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
