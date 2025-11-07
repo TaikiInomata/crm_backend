@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerResponseDTO {
-
     private String id;
     private String fullname;
     private String email;

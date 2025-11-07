@@ -2,6 +2,8 @@ package com.MD.CRM.service;
 
 import com.MD.CRM.dto.AuthenticationRequestDTO;
 import com.MD.CRM.dto.AuthenticationResponseDTO;
+import com.MD.CRM.dto.CustomerResponseDTO;
+import com.MD.CRM.dto.UserResponseDTO;
 import com.MD.CRM.entity.User;
 import com.MD.CRM.repository.UserRepository;
 import com.MD.CRM.utils.JwtUtil;
@@ -42,13 +44,31 @@ public class AuthenticationService {
         }
 
         // 4️⃣ Sinh JWT access & refresh token
-        String accessToken = jwtUtil.generateToken(user.getEmail(), false);
-        String refreshToken = jwtUtil.generateToken(user.getEmail(), true);
+        String accessToken = jwtUtil.generateToken(user.getId(), false);
+        String refreshToken = jwtUtil.generateToken(user.getId(), true);
 
         // 5️⃣ Trả về response
         return AuthenticationResponseDTO.builder()
+                .id(user.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .build();
+    }
+
+    public UserResponseDTO getDetail(String id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found!"));
+        if (!user.getIsActive()) {
+            throw new IllegalArgumentException("User is inactive!");
+        }
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullname())
+                .roles(user.getRole())
+                .lastLogin(user.getLastLogin())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
                 .build();
     }
 
