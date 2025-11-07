@@ -34,6 +34,9 @@ public class CustomerNote {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    private Boolean status = true;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

@@ -69,7 +69,7 @@ public class CustomerNoteController {
     }
 
     // 🟥 DELETE
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/delete/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
         try {
