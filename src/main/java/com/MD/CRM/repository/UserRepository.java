@@ -19,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     // ✅ Thêm method mới — tìm user theo email và is_active = true
     Optional<User> findByEmailAndIsActiveTrue(String email);
+
+    Optional<User> findByIdAndIsActiveTrue(String id);
 }
