@@ -32,13 +32,19 @@ public class ActivityLogController {
     public ResponseEntity<?> searchLogs(
             @RequestParam(required = false) String userId,
             @RequestParam(required = false) String action,
+            @RequestParam(required = false) String type,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        var results = activityLogService.search(userId, action, from, to, pageable);
+        com.MD.CRM.entity.ActivityAction actionEnum = null;
+        com.MD.CRM.entity.ActivityType typeEnum = null;
+        try { if (action != null) actionEnum = com.MD.CRM.entity.ActivityAction.valueOf(action.toUpperCase()); } catch (Exception ignored) {}
+        try { if (type != null) typeEnum = com.MD.CRM.entity.ActivityType.valueOf(type.toUpperCase()); } catch (Exception ignored) {}
+
+        var results = activityLogService.search(userId, typeEnum, actionEnum, from, to, pageable);
         return ResponseEntity.ok(results);
     }
 
@@ -47,22 +53,29 @@ public class ActivityLogController {
     public ResponseEntity<byte[]> exportCsv(
             @RequestParam(required = false) String userId,
             @RequestParam(required = false) String action,
+            @RequestParam(required = false) String type,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
         // fetch first page with large size for export
-        var page = activityLogService.search(userId, action, from, to, PageRequest.of(0, 10000));
+        com.MD.CRM.entity.ActivityAction actionEnum = null;
+        com.MD.CRM.entity.ActivityType typeEnum = null;
+        try { if (action != null) actionEnum = com.MD.CRM.entity.ActivityAction.valueOf(action.toUpperCase()); } catch (Exception ignored) {}
+        try { if (type != null) typeEnum = com.MD.CRM.entity.ActivityType.valueOf(type.toUpperCase()); } catch (Exception ignored) {}
+
+        var page = activityLogService.search(userId, typeEnum, actionEnum, from, to, PageRequest.of(0, 10000));
         List<ActivityLogDTO> logs = page.getContent();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(out);
-        writer.println("id,userId,username,action,description,createdAt");
+    writer.println("id,userId,username,type,action,description,createdAt");
         for (ActivityLogDTO l : logs) {
             writer.printf("%s,%s,%s,%s,%s,%s\n",
                     l.getId(),
                     l.getUserId(),
                     l.getUsername(),
-                    l.getAction(),
+            l.getType(),
+            l.getAction(),
                     l.getDescription() == null ? "" : l.getDescription().replaceAll("\r|\n", " "),
                     l.getCreatedAt() == null ? "" : l.getCreatedAt().toString()
             );

@@ -16,6 +16,7 @@ public class ActivityLogDTO {
     private String userId;
     private String username;
     private String action;
+    private String type;
     private String description;
     private LocalDateTime createdAt;
 }
