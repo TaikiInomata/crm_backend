@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class AuthenticationResponseDTO {
+    private String id;
     private String accessToken;
     private String refreshToken;
 
