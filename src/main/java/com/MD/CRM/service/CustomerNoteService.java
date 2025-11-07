@@ -23,6 +23,7 @@ public class CustomerNoteService {
     final private CustomerNoteMapper customerNoteMapper;
     final private CustomerRepository customerRepository;
     final private UserRepository userRepository;
+    final private com.MD.CRM.service.ActivityLogService activityLogService;
 
     public CustomerNoteResponseDTO create(CreateCustomerNoteRequestDTO request) {
         // 1️⃣ Kiểm tra tồn tại Customer
@@ -44,6 +45,10 @@ public class CustomerNoteService {
         CustomerNote savedNote = customerNoteRepository.save(customerNote);
 
         // 6️⃣ Trả về DTO phản hồi
+        // Record activity
+        try {
+            activityLogService.record(request.getUserId(), "NOTE_CREATE", "Created note for customerId=" + request.getCustomerId());
+        } catch (Exception ignore) {}
         return customerNoteMapper.toResponseDTO(savedNote);
 
     }
@@ -55,6 +60,10 @@ public class CustomerNoteService {
 
         CustomerNote savedNote = customerNoteRepository.save(note);
 
+        try {
+            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), "NOTE_UPDATE", "Updated note id=" + id);
+        } catch (Exception ignore) {}
+
         return customerNoteMapper.toResponseDTO(savedNote);
     }
 
@@ -64,6 +73,9 @@ public class CustomerNoteService {
                 .orElseThrow(() -> new IllegalArgumentException("Customer note not found!"));
 
         customerNoteRepository.delete(note);
+        try {
+            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), "NOTE_DELETE", "Deleted note id=" + id);
+        } catch (Exception ignore) {}
     }
 
     // GET DETAIL
