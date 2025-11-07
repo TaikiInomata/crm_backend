@@ -8,15 +8,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CustomerNoteRepository extends JpaRepository<CustomerNote, String> {
     @Query("""
             SELECT n FROM CustomerNote n
-            WHERE (:customerId IS NULL OR n.customer.id = :customerId)
+            WHERE n.status = true
+              AND (:customerId IS NULL OR n.customer.id = :customerId)
               AND (:staffId IS NULL OR n.staff.id = :staffId)
             """)
     Page<CustomerNote> findByFilters(@Param("customerId") String customerId,
                                      @Param("staffId") String staffId,
                                      Pageable pageable);
 
+
+    Optional<CustomerNote> findByIdAndStatusTrue(String id);
 }
