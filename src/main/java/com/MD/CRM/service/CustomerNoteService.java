@@ -73,14 +73,11 @@ public class CustomerNoteService {
                 .orElseThrow(() -> new IllegalArgumentException("Customer note not found!"));
 
         customerNoteRepository.delete(note);
-        try {
-            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), "NOTE_DELETE", "Deleted note id=" + id);
-        } catch (Exception ignore) {}
     }
 
     // GET DETAIL
     public CustomerNoteResponseDTO getDetail(String id) {
-        CustomerNote note = customerNoteRepository.findById(id)
+        CustomerNote note = customerNoteRepository.findByIdAndStatusTrue(id)
                 .orElseThrow(() -> new IllegalArgumentException("Customer note not found!"));
 
         return customerNoteMapper.toResponseDTO(note);
