@@ -36,7 +36,14 @@ public class AuthenticationService {
 
         // 2️⃣ Tìm user theo email + active = true
         User user = userRepository.findByEmailAndIsActiveTrue(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Email not found or user is inactive!"));
+                .orElseThrow(() -> {
+                    // Log để debug
+                    userRepository.findByEmail(request.getEmail()).ifPresentOrElse(
+                        u -> System.out.println("User found but isActive = " + u.getIsActive()),
+                        () -> System.out.println("User not found with email: " + request.getEmail())
+                    );
+                    return new IllegalArgumentException("Email not found or user is inactive!");
+                });
 
         // 3️⃣ Kiểm tra mật khẩu
         if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
