@@ -22,6 +22,7 @@ public class ActivityLogService {
     private final ActivityLogRepository activityLogRepository;
     private final ActivityLogMapper activityLogMapper;
     private final UserRepository userRepository;
+    private final com.MD.CRM.repository.CustomerRepository customerRepository;
 
     public void record(String userId, ActivityType type, ActivityAction action, String description) {
     // If we don't have a user id, skip recording to avoid inserting null FK
@@ -47,6 +48,25 @@ public class ActivityLogService {
 
     public Page<ActivityLogDTO> search(String userId, ActivityType type, ActivityAction action, LocalDateTime from, LocalDateTime to, Pageable pageable) {
         Page<ActivityLog> page = activityLogRepository.findByFilters(userId, type, action, from, to, pageable);
-        return page.map(activityLogMapper::toDTO);
+        return page.map(e -> {
+            var dto = activityLogMapper.toDTO(e);
+            // Try to extract customer id from description like "(id=...)", then fetch email
+            if (dto != null && dto.getDescription() != null) {
+                String desc = dto.getDescription();
+                int idx = desc.indexOf("(id=");
+                if (idx >= 0) {
+                    int start = idx + 4;
+                    int end = desc.indexOf(')', start);
+                    if (end > start) {
+                        String customerId = desc.substring(start, end);
+                        try {
+                            var cust = customerRepository.findById(customerId).orElse(null);
+                            if (cust != null) dto.setCustomerEmail(cust.getEmail());
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+            return dto;
+        });
     }
 }

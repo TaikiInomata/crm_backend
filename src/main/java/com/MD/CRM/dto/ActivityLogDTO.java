@@ -15,8 +15,10 @@ public class ActivityLogDTO {
     private String id;
     private String userId;
     private String username;
+    private String userEmail;
     private String action;
     private String type;
     private String description;
+    private String customerEmail;
     private LocalDateTime createdAt;
 }
