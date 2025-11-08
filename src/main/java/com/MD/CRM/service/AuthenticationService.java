@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +52,15 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Incorrect password!");
         }
 
-        // 4️⃣ Sinh JWT access & refresh token
+        // 4️⃣ Cập nhật last_login
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+
+        // 5️⃣ Sinh JWT access & refresh token
         String accessToken = jwtUtil.generateToken(user.getId(), false);
         String refreshToken = jwtUtil.generateToken(user.getId(), true);
 
-        // 5️⃣ Trả về response
+        // 6️⃣ Trả về response
         return AuthenticationResponseDTO.builder()
                 .id(user.getId())
                 .accessToken(accessToken)
