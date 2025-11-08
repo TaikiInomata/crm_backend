@@ -22,6 +22,7 @@ public class CustomerNoteService {
     final private CustomerNoteRepository customerNoteRepository;
     final private CustomerNoteMapper customerNoteMapper;
     final private CustomerRepository customerRepository;
+    final private com.MD.CRM.service.CustomerService customerService;
     final private UserRepository userRepository;
     final private com.MD.CRM.service.ActivityLogService activityLogService;
 
@@ -48,7 +49,10 @@ public class CustomerNoteService {
         // 6️⃣ Trả về DTO phản hồi
         // Record activity
         try {
-            activityLogService.record(request.getUserId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.CREATE, "Created note for customerId=" + request.getCustomerId());
+            String customerName = customer.getFullname();
+            String desc = "Created note for customer='" + (customerName == null ? "" : customerName) + "' (id=" + request.getCustomerId() + ")";
+            // pass null for type so ActivityLogService resolves type from action (CREATE -> LOG)
+            activityLogService.record(request.getUserId(), null, com.MD.CRM.entity.ActivityAction.CREATE, desc);
         } catch (Exception ignore) {}
         return customerNoteMapper.toResponseDTO(savedNote);
 
@@ -62,7 +66,16 @@ public class CustomerNoteService {
         CustomerNote savedNote = customerNoteRepository.save(note);
 
         try {
-            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.UPDATE, "Updated note id=" + id);
+            String customerName = "";
+            String customerId = note.getCustomer() == null ? null : note.getCustomer().getId();
+            if (customerId != null) {
+                try {
+                    var cust = customerService.getCustomerById(customerId);
+                    customerName = cust == null ? "" : cust.getFullname();
+                } catch (Exception ignored) {}
+            }
+            String desc = "Updated note id=" + id + " for customer='" + (customerName == null ? "" : customerName) + "' (id=" + (customerId == null ? "" : customerId) + ")";
+            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), null, com.MD.CRM.entity.ActivityAction.UPDATE, desc);
         } catch (Exception ignore) {}
 
         return customerNoteMapper.toResponseDTO(savedNote);
@@ -76,7 +89,16 @@ public class CustomerNoteService {
         note.setStatus(false);
         customerNoteRepository.save(note);
         try {
-            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.EDIT, "Deleted note id=" + id);
+            String customerName = "";
+            String customerId = note.getCustomer() == null ? null : note.getCustomer().getId();
+            if (customerId != null) {
+                try {
+                    var cust = customerService.getCustomerById(customerId);
+                    customerName = cust == null ? "" : cust.getFullname();
+                } catch (Exception ignored) {}
+            }
+            String desc = "Deleted note id=" + id + " for customer='" + (customerName == null ? "" : customerName) + "' (id=" + (customerId == null ? "" : customerId) + ")";
+            activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), null, com.MD.CRM.entity.ActivityAction.EDIT, desc);
         } catch (Exception ignore) {}
     }
 
