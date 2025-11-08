@@ -24,6 +24,35 @@ public class ActivityLogService {
     private final UserRepository userRepository;
     private final com.MD.CRM.repository.CustomerRepository customerRepository;
 
+    public void createInteractionByEmails(String customerEmail, String userEmail, String actionStr, String description) {
+        if (customerEmail == null || userEmail == null || actionStr == null) {
+            throw new IllegalArgumentException("customerEmail, userEmail and action are required");
+        }
+
+        var userOpt = userRepository.findByEmail(userEmail);
+        var custOpt = customerRepository.findByEmailAndDeletedAtIsNull(customerEmail);
+
+        if (userOpt.isEmpty() || custOpt.isEmpty()) {
+            throw new IllegalArgumentException("User or customer not found");
+        }
+
+        var user = userOpt.get();
+        var cust = custOpt.get();
+
+        com.MD.CRM.entity.ActivityAction action;
+        try {
+            action = com.MD.CRM.entity.ActivityAction.valueOf(actionStr.toUpperCase());
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid action");
+        }
+
+        // build description if not provided
+        String desc = description == null ? "Interaction with customer='" + (cust.getFullname() == null ? "" : cust.getFullname()) + "' (id=" + cust.getId() + ")" : description;
+
+        // record with null type so it resolves from action
+        record(user.getId(), null, action, desc);
+    }
+
     public void record(String userId, ActivityType type, ActivityAction action, String description) {
     // If we don't have a user id, skip recording to avoid inserting null FK
     if (userId == null) return;
