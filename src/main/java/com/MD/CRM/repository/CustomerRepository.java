@@ -30,7 +30,8 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
            "LOWER(c.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(c.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "c.phone LIKE CONCAT('%', :keyword, '%') OR " +
-           "LOWER(c.address) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+           "LOWER(c.address) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "ORDER BY c.createdAt DESC")
     Page<Customer> searchCustomers(String keyword, Pageable pageable);
 
     /**
