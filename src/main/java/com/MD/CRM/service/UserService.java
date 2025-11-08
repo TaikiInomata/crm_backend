@@ -61,6 +61,8 @@ public class UserService {
         // Hash password using BCrypt (same as login)
         String hashedPassword = authenticationService.encodePassword(requestDTO.getPassword());
         user.setPassword(hashedPassword);
+        log.info("Password hashed for user: {}", requestDTO.getUsername());
+        log.info("IsActive: {}", user.getIsActive());
         
         // Set timestamps manually
         LocalDateTime now = LocalDateTime.now();
