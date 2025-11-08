@@ -8,5 +8,22 @@ public enum ActivityAction {
     CALL,
     EMAIL,
     MEETING,
-    OTHER
+    OTHER;
+
+    public ActivityType getType() {
+        switch (this) {
+            case CREATE:
+            case EDIT:
+            case UPDATE:
+            case LOGIN:
+                return ActivityType.LOG;
+            case CALL:
+            case EMAIL:
+            case MEETING:
+            case OTHER:
+            default:
+                return ActivityType.INTERACTION;
+        }
+    }
 }
+
