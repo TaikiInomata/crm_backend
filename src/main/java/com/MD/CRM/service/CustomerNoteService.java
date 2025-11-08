@@ -71,10 +71,11 @@ public class CustomerNoteService {
 
     // DELETE
     public void delete(String id) {
-        CustomerNote note = customerNoteRepository.findById(id)
+        CustomerNote note = customerNoteRepository.findByIdAndStatusTrue(id)
                 .orElseThrow(() -> new IllegalArgumentException("Customer note not found!"));
 
-        customerNoteRepository.delete(note);
+        note.setStatus(false);
+        customerNoteRepository.save(note);
         try {
             activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.EDIT, "Deleted note id=" + id);
         } catch (Exception ignore) {}

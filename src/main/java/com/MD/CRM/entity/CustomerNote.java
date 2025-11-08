@@ -34,8 +34,8 @@ public class CustomerNote {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private Boolean status = true;
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private Boolean status;
 
     @CreationTimestamp
     @Column(updatable = false)

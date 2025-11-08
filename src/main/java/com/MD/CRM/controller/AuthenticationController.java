@@ -18,13 +18,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> authenticate(
             @RequestBody @Valid AuthenticationRequestDTO request) {
         try {

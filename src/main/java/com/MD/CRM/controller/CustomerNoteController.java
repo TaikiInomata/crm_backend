@@ -6,6 +6,7 @@ import com.MD.CRM.dto.UpdateCustomerNoteRequestDTO;
 import com.MD.CRM.service.CustomerNoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -94,14 +95,29 @@ public class CustomerNoteController {
     public ResponseEntity<Map<String, Object>> getAllNotes(
             @RequestParam(required = false) String customerId,
             @RequestParam(required = false) String staffId,
-            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
 
         Map<String, Object> response = new HashMap<>();
 
         try {
+
+            // 🔹 1️⃣ Phân tách sort (mặc định đã luôn có giá trị)
+            String[] sortParts = sort.split(",");
+            String sortField = sortParts[0];
+            Sort.Direction sortDirection =
+                    (sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc"))
+                            ? Sort.Direction.ASC
+                            : Sort.Direction.DESC;
+
+            // 🔹 2️⃣ Tạo Pageable
+            Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
+
+            // 🔹 3️⃣ Gọi service
             Page<CustomerNoteResponseDTO> data = customerNoteService.getAll(customerId, staffId, pageable);
 
+            // 🔹 4️⃣ Trả response
             response.put("message", "Fetched customer notes successfully!");
             response.put("data", data);
             response.put("success", true);
