@@ -26,7 +26,7 @@ public class WebConfig {
                                 "https://crmbackend-production-fdb8.up.railway.app", // Swagger + frontend deploy
                                 "https://cnpm-2-fe.vercel.app"
                         )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
                         .allowCredentials(true); // Cho phép gửi cookie/token nếu có
             }
