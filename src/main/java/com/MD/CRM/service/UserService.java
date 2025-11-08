@@ -31,6 +31,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final AuthenticationService authenticationService;
 
     /**
      * Create a new user
@@ -57,10 +58,11 @@ public class UserService {
         // Convert DTO to entity
         User user = userMapper.toEntity(requestDTO);
         
-        // TODO: Hash password before saving (use BCryptPasswordEncoder)
-        // For now, storing plain text - MUST BE FIXED IN PRODUCTION
+        // Hash password using BCrypt (same as login)
+        String hashedPassword = authenticationService.encodePassword(requestDTO.getPassword());
+        user.setPassword(hashedPassword);
         
-        // Set timestamps manually (in case @CreationTimestamp/@UpdateTimestamp doesn't work)
+        // Set timestamps manually
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
@@ -110,10 +112,10 @@ public class UserService {
             user.setFullname(updateDTO.getFullname());
         }
 
-        // Update password if provided
+        // Update password if provided (hash with BCrypt)
         if (updateDTO.getPassword() != null && !updateDTO.getPassword().isEmpty()) {
-            // TODO: Hash password before saving
-            user.setPassword(updateDTO.getPassword());
+            String hashedPassword = authenticationService.encodePassword(updateDTO.getPassword());
+            user.setPassword(hashedPassword);
         }
 
         user.setUpdatedAt(LocalDateTime.now());
