@@ -30,10 +30,15 @@ public class ActivityLogService {
     User user = userRepository.findById(userId).orElse(null);
     // If user not found, skip recording
     if (user == null) return;
+    // If caller didn't provide a type, derive it from the action
+    ActivityType resolvedType = type;
+    if (resolvedType == null && action != null) {
+        resolvedType = action.getType();
+    }
 
     ActivityLog log = ActivityLog.builder()
         .user(user)
-        .type(type)
+        .type(resolvedType)
         .action(action)
         .description(description)
         .build();

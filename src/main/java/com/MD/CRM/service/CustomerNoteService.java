@@ -48,7 +48,9 @@ public class CustomerNoteService {
         // 6️⃣ Trả về DTO phản hồi
         // Record activity
         try {
-            activityLogService.record(request.getUserId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.CREATE, "Created note for customerId=" + request.getCustomerId());
+            String customerName = customer.getFullname();
+            String desc = "Created note for customer='" + (customerName == null ? "" : customerName) + "' (id=" + request.getCustomerId() + ")";
+            activityLogService.record(request.getUserId(), com.MD.CRM.entity.ActivityType.INTERACTION, com.MD.CRM.entity.ActivityAction.CREATE, desc);
         } catch (Exception ignore) {}
         return customerNoteMapper.toResponseDTO(savedNote);
 
