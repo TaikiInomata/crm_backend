@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -38,7 +39,7 @@ public class ActivityLogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         com.MD.CRM.entity.ActivityAction actionEnum = null;
         com.MD.CRM.entity.ActivityType typeEnum = null;
         try { if (action != null) actionEnum = com.MD.CRM.entity.ActivityAction.valueOf(action.toUpperCase()); } catch (Exception ignored) {}
@@ -63,7 +64,7 @@ public class ActivityLogController {
         try { if (action != null) actionEnum = com.MD.CRM.entity.ActivityAction.valueOf(action.toUpperCase()); } catch (Exception ignored) {}
         try { if (type != null) typeEnum = com.MD.CRM.entity.ActivityType.valueOf(type.toUpperCase()); } catch (Exception ignored) {}
 
-        var page = activityLogService.search(userId, typeEnum, actionEnum, from, to, PageRequest.of(0, 10000));
+    var page = activityLogService.search(userId, typeEnum, actionEnum, from, to, PageRequest.of(0, 10000, Sort.by(Sort.Direction.DESC, "createdAt")));
         List<ActivityLogDTO> logs = page.getContent();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
