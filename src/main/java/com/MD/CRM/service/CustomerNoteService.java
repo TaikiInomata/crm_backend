@@ -53,14 +53,19 @@ public class CustomerNoteService {
             String desc = "Created note for customer='" + (customerName == null ? "" : customerName) + "' (id=" + request.getCustomerId() + ")";
             // pass null for type so ActivityLogService resolves type from action (CREATE -> LOG)
             activityLogService.record(request.getUserId(), null, com.MD.CRM.entity.ActivityAction.CREATE, desc);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return customerNoteMapper.toResponseDTO(savedNote);
 
     }
 
-    public CustomerNoteResponseDTO update(@RequestBody UpdateCustomerNoteRequestDTO request, String id) {
+    public CustomerNoteResponseDTO update(@RequestBody UpdateCustomerNoteRequestDTO request, String id, String userId) {
         CustomerNote note = customerNoteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Customer note not found!"));
+
+        if (note.getStaff() == null || !note.getStaff().getId().equals(userId)) {
+            throw new IllegalArgumentException("You don't have permission to update this note");
+        }
         note.setContent(request.getContent());
 
         CustomerNote savedNote = customerNoteRepository.save(note);
@@ -72,19 +77,25 @@ public class CustomerNoteService {
                 try {
                     var cust = customerService.getCustomerById(customerId);
                     customerName = cust == null ? "" : cust.getFullname();
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
             String desc = "Updated note id=" + id + " for customer='" + (customerName == null ? "" : customerName) + "' (id=" + (customerId == null ? "" : customerId) + ")";
             activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), null, com.MD.CRM.entity.ActivityAction.UPDATE, desc);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
 
         return customerNoteMapper.toResponseDTO(savedNote);
     }
 
     // DELETE
-    public void delete(String id) {
+    public void delete(String id, String userId) {
         CustomerNote note = customerNoteRepository.findByIdAndStatusTrue(id)
                 .orElseThrow(() -> new IllegalArgumentException("Customer note not found!"));
+
+        if (note.getStaff() == null || !note.getStaff().getId().equals(userId)) {
+            throw new IllegalArgumentException("You don't have permission to delete this note");
+        }
 
         note.setStatus(false);
         customerNoteRepository.save(note);
@@ -95,11 +106,13 @@ public class CustomerNoteService {
                 try {
                     var cust = customerService.getCustomerById(customerId);
                     customerName = cust == null ? "" : cust.getFullname();
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
             String desc = "Deleted note id=" + id + " for customer='" + (customerName == null ? "" : customerName) + "' (id=" + (customerId == null ? "" : customerId) + ")";
             activityLogService.record(note.getStaff() == null ? null : note.getStaff().getId(), null, com.MD.CRM.entity.ActivityAction.EDIT, desc);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
     }
 
     // GET DETAIL

@@ -49,10 +49,11 @@ public class CustomerNoteController {
     // 🟦 UPDATE
     @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> update(@RequestBody UpdateCustomerNoteRequestDTO request,
-                                                      @PathVariable String id) {
+                                                      @PathVariable String id,
+                                                      @RequestHeader(value = "Userid", required = true) String userId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            CustomerNoteResponseDTO data = customerNoteService.update(request, id);
+            CustomerNoteResponseDTO data = customerNoteService.update(request, id, userId);
             response.put("message", "Updated Customer Note Successfully!");
             response.put("data", data);
             response.put("success", true);
@@ -71,10 +72,12 @@ public class CustomerNoteController {
 
     // 🟥 DELETE
     @PutMapping("/delete/{id}")
-    public ResponseEntity<Map<String, Object>> delete(@PathVariable String id) {
+    public ResponseEntity<Map<String, Object>> delete(
+            @PathVariable String id,
+            @RequestHeader(value = "Userid", required = true) String userId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            customerNoteService.delete(id);
+            customerNoteService.delete(id, userId);
             response.put("message", "Deleted Customer Note Successfully!");
             response.put("success", true);
             return ResponseEntity.ok(response);
