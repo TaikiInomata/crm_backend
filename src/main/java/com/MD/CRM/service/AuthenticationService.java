@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
+import com.MD.CRM.service.ActivityLogService;
+import com.MD.CRM.entity.ActivityAction;
 
 
 @Service
@@ -24,6 +26,7 @@ public class AuthenticationService {
 
     UserRepository userRepository;
     JwtUtil jwtUtil;
+    ActivityLogService activityLogService;
 
 
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
@@ -61,6 +64,11 @@ public class AuthenticationService {
         String refreshToken = jwtUtil.generateToken(user.getId(), true);
 
         // 6️⃣ Trả về response
+        // Record login activity (skip if activity service unavailable)
+        try {
+            activityLogService.record(user.getId(), null, ActivityAction.LOGIN, "User logged in");
+        } catch (Exception ignored) {}
+
         return AuthenticationResponseDTO.builder()
                 .id(user.getId())
                 .accessToken(accessToken)
