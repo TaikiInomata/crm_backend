@@ -2,14 +2,17 @@ package com.MD.CRM.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_user_role", columnList = "role"),
+    @Index(name = "idx_user_is_active", columnList = "is_active"),
+    @Index(name = "idx_user_email", columnList = "email"),
+    @Index(name = "idx_user_username", columnList = "username")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,20 +37,20 @@ public class User {
     @Column(length = 150)
     private String fullname;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private Role role = Role.STAFF;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean isActive = true;
 
     private LocalDateTime lastLogin;
 
-    @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     // Enum Role (ADMIN / STAFF)

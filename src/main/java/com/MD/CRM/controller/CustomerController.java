@@ -34,14 +34,21 @@ public class CustomerController {
      */
     @GetMapping("/all")
     @Operation(summary = "Get all customers with pagination", 
-               description = "Retrieves customers with pagination and optional keyword search (searches in fullname, email, phone, address)")
+               description = "Retrieves customers with pagination and optional keyword search. " +
+                           "Keyword will search across: fullname, email, phone, and address fields (case-insensitive)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved customer list"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> getAllCustomers(
+            @io.swagger.v3.oas.annotations.Parameter(
+                description = "Search keyword - searches in fullname, email, phone, and address (case-insensitive)", 
+                example = "khang"
+            )
             @RequestParam(required = false) String keyword,
+            @io.swagger.v3.oas.annotations.Parameter(description = "Page number (0-indexed)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @io.swagger.v3.oas.annotations.Parameter(description = "Number of items per page", example = "20")
             @RequestParam(defaultValue = "20") int size) {
         
         Map<String, Object> result = customerService.getAllCustomers(keyword, page, size);
@@ -158,10 +165,23 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search customers", description = "Search customers by name, email or phone (case-insensitive)")
+    @Operation(summary = "Search customers with relevance ranking", 
+               description = "Search customers by keyword with intelligent relevance scoring. " +
+                           "Searches across: fullname, email, and phone (case-insensitive). " +
+                           "Results are ranked by relevance - exact matches appear first, then prefix matches, then partial matches.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Search results retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Map<String, Object>> searchCustomers(
+            @io.swagger.v3.oas.annotations.Parameter(
+                description = "Search keyword - searches in fullname, email, and phone with relevance ranking (case-insensitive)", 
+                example = "nguyen"
+            )
             @RequestParam(name = "keyword", required = false) String q,
+            @io.swagger.v3.oas.annotations.Parameter(description = "Page number (0-indexed)", example = "0")
             @RequestParam(name = "page", defaultValue = "0") int page,
+            @io.swagger.v3.oas.annotations.Parameter(description = "Number of items per page", example = "20")
             @RequestParam(name = "size", defaultValue = "20") int size) {
 
         org.springframework.data.domain.Page<CustomerResponseDTO> results = customerService.searchCustomers(q, page, size);
