@@ -13,10 +13,12 @@ public class ActivityLogMapper {
                 .id(e.getId())
                 .userId(e.getUser() == null ? null : e.getUser().getId())
                 .username(e.getUser() == null ? null : e.getUser().getUsername())
+                .userEmail(e.getUser() == null ? null : e.getUser().getEmail())
         .action(e.getAction() == null ? null : e.getAction().name())
         .type(e.getType() == null ? null : e.getType().name())
                 .description(e.getDescription())
                 .createdAt(e.getCreatedAt())
+                .customerEmail(null)
                 .build();
     }
 }
