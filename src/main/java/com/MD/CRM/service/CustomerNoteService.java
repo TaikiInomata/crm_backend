@@ -40,6 +40,7 @@ public class CustomerNoteService {
         // 4️⃣ Gán lại quan hệ chính xác (nếu mapper chưa set)
         customerNote.setCustomer(customer);
         customerNote.setStaff(staff);
+        customerNote.setStatus(true);
 
         // 5️⃣ Lưu vào DB
         CustomerNote savedNote = customerNoteRepository.save(customerNote);
